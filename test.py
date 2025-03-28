@@ -95,8 +95,8 @@ def get_result(question):
     
 
 
-# question = "find all complete task for user with userid 1?"
-question = "Which users have completed at least 10 tasks?"
+question = "find all complete task for user with userid 1?"
+# question = "Which users have completed at least 10 tasks?"
 s_time = time.time()
 get_result(question)
 print(time.time() - s_time)
