@@ -1,4 +1,4 @@
-class ConfigData:
+class ConfigData_old:
     MONGO_DB_URI = "mongodb://localhost:27017/"
     DB_NAME = "dummy_data"
     COLLECTION_NAME = "todos"
@@ -20,3 +20,66 @@ class ConfigData:
                     4. completed:
                         - Description: Status of the task.
                     '''
+    
+
+
+class ConfigData:
+    MONGO_DB_URI = "mongodb://localhost:27017/"
+    DB_NAME = "kv_rag"
+    COLLECTION_NAME = "documents"
+    TABLE_SCHEMA = '''
+                        {
+                            "_id": "object",
+                            "document_id": "string",
+                            "document_name": "string",
+                            "document_type": "string",
+                            "attributes": {
+                                "purchase_order_id": "string",
+                                "spend_type": "string",
+                                "bf_level": "string"
+                            },
+                            "metrics": {
+                                "total_commitment": "float",
+                                "total_planned_commitment": "float",
+                                "total_commitment_gap": "float",
+                                "commitments_by_year": "object"
+                            },
+                            "text": "string"
+                        }
+
+                    '''
+    
+    SCHEMA_DESCRIPTION = '''
+                    Here is the description to determine what each key represents:
+                    {
+                        "_id":
+                                Unique identifier for the document.
+                        "document_id":
+                                A unique identifier assigned to the document (usually a file ).
+                        "document_name":
+                                The name of the document (usually a file name).
+                        "document_type":
+                                The type of document (e.g., "PO" for Purchase Order).
+                        "attributes": {  
+                            "purchase_order_id":
+                                The purchase order ID associated with the document.
+                            "spend_type":
+                                The category of spending for the purchase order.
+                            "bf_level":
+                                The business function level related to the purchase order.
+                        },
+                        "metrics": {
+                            "total_commitment":
+                                The total financial commitment for this purchase order.
+                            "total_planned_commitment":
+                                The planned financial commitment amount.
+                            "total_commitment_gap":
+                                The difference between total commitment and planned commitment.
+                            "commitments_by_year":
+                                A breakdown of commitments by year (if available).
+                        },
+                        "text":
+                                Extracted textual content summarizing key details from the document.
+                    }
+                    '''
+    

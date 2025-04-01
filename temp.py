@@ -2,7 +2,6 @@ from langchain_ollama import OllamaLLM
 from langchain.prompts import ChatPromptTemplate
 import json, pymongo
 from typing_extensions import TypedDict
-from langgraph.checkpoint.memory import MemorySaver
 
 from langgraph.graph import StateGraph, START, END
 
@@ -40,10 +39,10 @@ class AgentState(TypedDict):
 
 
 # Initialize the Primary LLM for Query Generation
-primary_llm = OllamaLLM(model="phi4", base_url="http://140.245.5.20:11434", num_thread=20)
+primary_llm = OllamaLLM(model="Mistral")
 
 # Initialize the Secondary LLM for Cross-Verification (Different Model or Instance)
-verification_llm = OllamaLLM(model="llama3.2", base_url="http://140.245.5.20:11434", num_thread=20)
+verification_llm = OllamaLLM(model="llama3.2")
 
 
 
@@ -65,17 +64,16 @@ def generate_query(state: AgentState):
         Schema Description: {schema_description}
 
         Here are some example queries:
-        Input: Total Commitment Summary
+        Input: find all completed tasks
         Output: {json_ex_string_1} 
-        Input: Count of Documents by Type
+        Input: find all completed tasks for userid 2, only return title
         Output: {json_ex_string_2} 
-        Input: Top 5 Highest Commitment Orders
+        Input: How many tasks has each user completed and not completed?
         Output: {json_ex_string_3}
-        Input: Filter Orders with Negative Commitment Gap
+        Input: What percentage of tasks has each user completed?
         Output: {json_ex_string_4}
 
-        Return strictly only the MongoDB query pipeline in plain text format. Exclude all explanations, markdown, code blocks, or non-pipeline content. Only the JSON pipeline array is needed.
-        
+        Return only the JSON query, nothing else.
         Input: {user_question}
         """
     )
@@ -93,10 +91,11 @@ def generate_query(state: AgentState):
         "json_ex_string_4": json_ex_string_4,
     })
 
-    response = response.replace("json","")
-    response = response.replace("```","")
-    state['pipeline'] = response
 
+    state['pipeline'] = json.dumps(response)
+
+    print("pipeline ==>\n\n ",state['pipeline'])
+    print("pipeline ==>\n\n ",type(state['pipeline']))
     
     return state
 
@@ -131,7 +130,7 @@ def verify_query(state: AgentState):
         "table_schema": table_schema,
         "schema_description": schema_description,
         "user_question": question,
-        "generated_query": pipeline
+        "generated_query": json.dumps(pipeline)
     })
     
     if "VALID" in response:
@@ -139,32 +138,38 @@ def verify_query(state: AgentState):
     else:
         state["is_valid_query"] = False
     
-
+    print("is_valid_query ==>\n\n", state['is_valid_query'])
     return state
 
 
 
 def execute_query(state: AgentState):
     """Executes the given MongoDB aggregation query and returns results."""
+    
+    pipeline = json.loads(state['pipeline'])
+    print("ARNAB ")
+    print(pipeline, type(pipeline))
 
- 
+
+    
+    
+
     try:
-        pipeline = json.loads(state['pipeline'])
         text_ = ""
         results = collection_name.aggregate(pipeline)
 
         # return list(results)  # Convert cursor to a list for output
         for doc in results:
-            text_ += str(doc) + ",\n"
+            text_ += str(doc)
         state['query_result'] = text_
-        if state['query_result']:
-            state['query_error'] = False
-        else:
-            state['query_error'] = True
+        state['query_error'] = False
     
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         state['query_error'] = True
     
+    print("query_error ==>\n\n", state['query_error'])
     
     return state
 
@@ -182,8 +187,6 @@ def generate_human_readable_answer(state: AgentState):
         """You are an assistant that converts MongoDB pipeline results into clear, natural language responses without including any identifiers like order userId, _Id. Start the response with a friendly greeting.
         MongoDB pipeline : {pipeline}
         results : {query_result}
-        Table schema: {table_schema}
-        Schema Description: {schema_description}
         """)
 
     # LLM Chain for Convert Result into human readable answer
@@ -191,28 +194,14 @@ def generate_human_readable_answer(state: AgentState):
 
     response = human_readable_answer_chain.invoke({
       "pipeline" : pipeline,
-      "query_result" : query_result,
-      "table_schema": table_schema,
-        "schema_description": schema_description,
+      "query_result" : query_result
     })
 
     state["final_result"] = response
 
+    print("final_result ==>\n\n", state['final_result'])
+
     return state
-
-
-# def check_relevance(state: AgentState, config: RunnableConfig):
-#     question = state["question"]
-#     schema = get_database_schema(engine)
-#     print(f"Checking relevance of the question: {question}")
-#     system = """You are an assistant that determines whether a given question is related to the following database schema.
-
-# Schema:
-# {schema}
-
-# Respond with only "relevant" or "not_relevant".
-# """
-
 
 
 ###############################################
@@ -273,13 +262,10 @@ app = workflow.compile()
 
 
 
-user_question_1 = "provide top 10 commitment gaps with bf level information?"
+user_question_1 = "What was the first and most recent task added for each user?"
 result_1 = app.invoke({"question": user_question_1})
-print() 
-      
-print("FINAL RESULT ==>\n",result_1['final_result'])
-print("PIPELINE ==>\n",result_1['pipeline'])
-print("query_result ==> ", result_1['query_result'])
+print("Result: \n\n", result_1['final_result'])
+
 
 
 # try:
