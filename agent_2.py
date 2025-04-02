@@ -8,7 +8,7 @@ from langgraph.graph import StateGraph, START, END
 
 from config import ConfigData
 from example import ExampleData
-from IPython.display import Image
+
 
 # Load Schema and Examples
 table_schema = ConfigData.TABLE_SCHEMA
@@ -174,12 +174,12 @@ def generate_human_readable_answer(state: AgentState):
 
     pipeline = state["pipeline"]
     query_result = state["query_result"]
-
-
+    question = state['question']
 
     # Human reable Prompt Template
     human_readable_answer_prompt_template = ChatPromptTemplate.from_template(
-        """You are an assistant that converts MongoDB pipeline results into clear, natural language responses without including any identifiers like order userId, _Id. Start the response with a friendly greeting.
+        """You are an assistant that answer the user question base on MongoDB pipeline results into clear, natural language responses without including any identifiers like order userId, _Id. Start the response with a friendly greeting.
+        Question : {question}
         MongoDB pipeline : {pipeline}
         results : {query_result}
         Table schema: {table_schema}
@@ -193,7 +193,8 @@ def generate_human_readable_answer(state: AgentState):
       "pipeline" : pipeline,
       "query_result" : query_result,
       "table_schema": table_schema,
-        "schema_description": schema_description,
+      "schema_description": schema_description,
+      "question" : question
     })
 
     state["final_result"] = response
@@ -274,6 +275,7 @@ app = workflow.compile()
 
 
 user_question_1 = "provide top 10 commitment gaps with bf level information?"
+# user_question_1 = "Find the Spend Type with the Highest Total Commitment"
 result_1 = app.invoke({"question": user_question_1})
 print() 
       
