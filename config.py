@@ -30,22 +30,17 @@ class ConfigData:
     TABLE_SCHEMA = '''
                         {
                             "_id": "object",
-                            "document_id": "string",
+                            "document_id": "binary",
                             "document_name": "string",
                             "document_type": "string",
-                            "attributes": {
-                                "purchase_order_id": "string",
-                                "spend_type": "string",
-                                "bf_level": "string"
-                            },
-                            "metrics": {
-                                "total_commitment": "float",
-                                "total_planned_commitment": "float",
-                                "total_commitment_gap": "float",
-                                "commitments_by_year": "object"
-                            },
-                            "text": "string"
+                            "purchase_order_id": "string",
+                            "spend_type": "string",
+                            "bf_level": "string",
+                            "total_commitment": "number",
+                            "total_planned_commitment": "number",
+                            "total_commitment_gap": "number"
                         }
+
 
                     '''
     
@@ -60,26 +55,23 @@ class ConfigData:
                                 The name of the document (usually a file name).
                         "document_type":
                                 The type of document (e.g., "PO" for Purchase Order).
-                        "attributes": {  
-                            "purchase_order_id":
-                                The purchase order ID associated with the document.
-                            "spend_type":
-                                The category of spending for the purchase order.
-                            "bf_level":
-                                The business function level related to the purchase order.
-                        },
-                        "metrics": {
-                            "total_commitment":
-                                The total financial commitment for this purchase order.
-                            "total_planned_commitment":
-                                The planned financial commitment amount.
-                            "total_commitment_gap":
-                                The difference between total commitment and planned commitment.
-                            "commitments_by_year":
-                                A breakdown of commitments by year (if available).
-                        },
-                        "text":
-                                Extracted textual content summarizing key details from the document.
+                        
+                        "purchase_order_id":
+                            The purchase order ID associated with the document.
+                        "spend_type":
+                            The category of spending for the purchase order.
+                        "bf_level":
+                            The business function level related to the purchase order.
+                    
+                        "total_commitment":
+                            The total financial commitment for this purchase order.
+                        "total_planned_commitment":
+                            The planned financial commitment amount.
+                        "total_commitment_gap":
+                            The difference between total commitment and planned commitment.
+                        "commitments_by_year":
+                            A breakdown of commitments by year (if available).
+                        
                     }
                     '''
     

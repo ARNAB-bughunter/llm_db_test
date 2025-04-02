@@ -4,13 +4,20 @@ class ExampleData:
                             {
                                 "$group": {
                                 "_id": None,
-                                "total_commitment": { "$sum": "$metrics.total_commitment" },
-                                "total_planned_commitment": { "$sum": "$metrics.total_planned_commitment" },
-                                "total_commitment_gap": { "$sum": "$metrics.total_commitment_gap" }
+                                "total_commitment": { "$sum": "$total_commitment" },
+                                "total_planned_commitment": { "$sum": "$total_planned_commitment" },
+                                "total_commitment_gap": { "$sum": "$total_commitment_gap" }
+                                }
+                            },
+                            {
+                                "$project": {
+                                "_id": 0,
+                                "total_commitment": 1,
+                                "total_planned_commitment": 1,
+                                "total_commitment_gap": 1
                                 }
                             }
                         ]
-
 
     FEW_SHOT_EXAMPLE_2 = [
                             {
@@ -18,12 +25,20 @@ class ExampleData:
                                 "_id": "$document_type",
                                 "count": { "$sum": 1 }
                                 }
+                            },
+                            {
+                                "$project": {
+                                "_id": 0,
+                                "document_type": "$_id",
+                                "count": 1
+                                }
                             }
                         ]
+
     
     FEW_SHOT_EXAMPLE_3 = [
                             {
-                                "$sort": { "metrics.total_commitment": -1 }
+                                "$sort": { "total_commitment": -1 }
                             },
                             {
                                 "$limit": 5
@@ -31,9 +46,9 @@ class ExampleData:
                             {
                                 "$project": {
                                 "_id": 0,
+                                "purchase_order_id": 1,
                                 "document_name": 1,
-                                "purchase_order_id": "$attributes.purchase_order_id",
-                                "total_commitment": "$metrics.total_commitment"
+                                "total_commitment": 1
                                 }
                             }
                         ]
@@ -41,16 +56,18 @@ class ExampleData:
     
     FEW_SHOT_EXAMPLE_4 = [
                             {
-                                "$match": { "metrics.total_commitment_gap": { "$lt": 0 } }
+                                "$match": {
+                                "total_commitment_gap": { "$lt": 0 }
+                                }
                             },
                             {
                                 "$project": {
                                 "_id": 0,
-                                "purchase_order_id": "$attributes.purchase_order_id",
+                                "purchase_order_id": 1,
                                 "document_name": 1,
+                                "total_commitment": 1,
+                                "total_planned_commitment": 1,
                                 "total_commitment_gap": 1
                                 }
                             }
                         ]
-
-

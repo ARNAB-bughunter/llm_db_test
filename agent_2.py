@@ -178,7 +178,7 @@ def generate_human_readable_answer(state: AgentState):
 
     # Human reable Prompt Template
     human_readable_answer_prompt_template = ChatPromptTemplate.from_template(
-        """You are an assistant that answer the user question base on MongoDB pipeline results into clear, natural language responses without including any identifiers like order userId, _Id. Start the response with a friendly greeting.
+        """You are an assistant that answer the user question base on MongoDB pipeline results into clear, natural language responses without including any identifiers like order userId, _Id.
         Question : {question}
         MongoDB pipeline : {pipeline}
         results : {query_result}
@@ -274,7 +274,12 @@ app = workflow.compile()
 
 
 
-user_question_1 = "provide top 10 commitment gaps with bf level information?"
+user_question_1 = "what are my top 10 commitment gaps with bf level info?"
+
+user_question_1 = "give me a list of all the unique bf level?"
+
+user_question_1 = "could u pls write an email to the BM requesting an explanation for the top 10 gaps with bf level information"
+
 # user_question_1 = "Find the Spend Type with the Highest Total Commitment"
 result_1 = app.invoke({"question": user_question_1})
 print() 
